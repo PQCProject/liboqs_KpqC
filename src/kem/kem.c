@@ -293,6 +293,12 @@ OQS_API int OQS_KEM_alg_is_enabled(const char *method_name) {
 #else
 		return 0;
 #endif
+	} else if (0 == strcasecmp(method_name, OQS_KEM_alg_ntru_plus_kem777)) {
+#ifdef OQS_ENABLE_KEM_ntru_plus_kem777
+		return 1;
+#else
+		return 0;
+#endif
 	} else if (0 == strcasecmp(method_name, OQS_KEM_alg_ntru_plus_kem768)) {
 #ifdef OQS_ENABLE_KEM_ntru_plus_kem768
 		return 1;
@@ -527,6 +533,13 @@ OQS_API OQS_KEM *OQS_KEM_new(const char *method_name) {
 	else if (0 == strcasecmp(method_name, OQS_KEM_alg_ntru_plus_kem576)) {
 #ifdef OQS_ENABLE_KEM_ntru_plus_kem576
 		return OQS_KEM_ntru_plus_kem576_new();
+#else
+		return NULL;
+#endif
+	}
+	else if (0 == strcasecmp(method_name, OQS_KEM_alg_ntru_plus_kem777)) {
+#ifdef OQS_ENABLE_KEM_ntru_plus_kem777
+		return OQS_KEM_ntru_plus_kem777_new();
 #else
 		return NULL;
 #endif
