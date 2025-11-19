@@ -1,6 +1,12 @@
 #include "params.h"
+#include <oqs/oqsconfig.h>
 #include "reduce.h"
 #include "ntt.h"
+
+#if defined(OQS_USE_ARM_NEON_INSTRUCTIONS) && (defined(__ARM_NEON) || defined(__ARM_NEON__))
+#include <arm_neon.h>
+#define NTRUPLUS_HAVE_NEON 1
+#endif
 
 const int16_t zetas[144] = {
 	 -147, -1033, -1265,   708,   460,  1265,  -467,   727,
@@ -22,6 +28,33 @@ const int16_t zetas[144] = {
 	  905,  1195,  -619,   787,   118,   576,   286, -1475,
 	 -194,   928,  1229, -1032,  1608,  1111, -1669,   642
 };
+
+#if defined(NTRUPLUS_HAVE_NEON)
+static inline int16x4_t montgomery_reduce_vec4(int32x4_t a)
+{
+	int16x4_t a16 = vmovn_s32(a);
+	int16x4_t t16 = vmul_n_s16(a16, QINV);
+	int32x4_t prod = vmull_s16(t16, vdup_n_s16(NTRUPLUS_Q));
+	int32x4_t res = vshrq_n_s32(vsubq_s32(a, prod), 16);
+	return vmovn_s32(res);
+}
+
+static inline int16x4_t fqmul_vec4_const(int16x4_t a, int16_t zeta)
+{
+	int32x4_t prod = vmull_s16(a, vdup_n_s16(zeta));
+	return montgomery_reduce_vec4(prod);
+}
+
+static inline int16x4_t barrett_reduce_vec4(int16x4_t a)
+{
+	const int32_t v = ((1 << 26) + NTRUPLUS_Q/2)/NTRUPLUS_Q;
+	int32x4_t a32 = vmovl_s16(a);
+	int32x4_t t = vaddq_s32(vmulq_n_s32(a32, v), vdupq_n_s32(1 << 25));
+	t = vshrq_n_s32(t, 26);
+	t = vmulq_n_s32(t, NTRUPLUS_Q);
+	return vmovn_s32(vsubq_s32(a32, t));
+}
+#endif
 
 /*************************************************
 * Name:        fqmul
@@ -85,6 +118,64 @@ static int16_t fqinv(int16_t a)
 **************************************************/
 void ntt(int16_t r[NTRUPLUS_N], const int16_t a[NTRUPLUS_N])
 {
+#if defined(NTRUPLUS_HAVE_NEON)
+	int k = 1;
+	int16_t zeta1 = zetas[k++];
+
+	for(int i = 0; i < NTRUPLUS_N/2; i += 4)
+	{
+		int16x4_t a0 = vld1_s16(a + i);
+		int16x4_t a1 = vld1_s16(a + i + NTRUPLUS_N/2);
+		int16x4_t t1 = fqmul_vec4_const(a1, zeta1);
+
+		vst1_s16(r + i + NTRUPLUS_N/2, vsub_s16(vadd_s16(a0, a1), t1));
+		vst1_s16(r + i, vadd_s16(a0, t1));
+	}
+
+	for(int step = NTRUPLUS_N/6; step >= 32; step = step/3)
+	{
+		for(int start = 0; start < NTRUPLUS_N; start += 3*step)
+		{
+			int16_t zeta_a = zetas[k++];
+			int16_t zeta_b = zetas[k++];
+
+			for(int i = start; i < start + step; i += 4)
+			{
+				int16x4_t r0 = vld1_s16(r + i);
+				int16x4_t r1 = vld1_s16(r + i + step);
+				int16x4_t r2 = vld1_s16(r + i + 2*step);
+				int16x4_t t1 = fqmul_vec4_const(r1, zeta_a);
+				int16x4_t t2 = fqmul_vec4_const(r2, zeta_b);
+				int16x4_t diff = vsub_s16(t1, t2);
+				int16x4_t t3 = fqmul_vec4_const(diff, -886);
+
+				vst1_s16(r + i + 2*step, vsub_s16(vsub_s16(r0, t1), t3));
+				vst1_s16(r + i +   step, vadd_s16(vsub_s16(r0, t2), t3));
+				vst1_s16(r + i, vadd_s16(r0, vadd_s16(t1, t2)));
+			}
+		}
+	}
+
+	for(int step = 16; step >= 4; step >>= 1)
+	{
+		for(int start = 0; start < NTRUPLUS_N; start += (step << 1))
+		{
+			int16_t zeta = zetas[k++];
+
+			for(int i = start; i < start + step; i += 4)
+			{
+				int16x4_t r0 = vld1_s16(r + i);
+				int16x4_t r1 = vld1_s16(r + i + step);
+				int16x4_t t1 = fqmul_vec4_const(r1, zeta);
+				int16x4_t sum = vadd_s16(r0, t1);
+				int16x4_t diff = vsub_s16(r0, t1);
+
+				vst1_s16(r + i, barrett_reduce_vec4(sum));
+				vst1_s16(r + i + step, barrett_reduce_vec4(diff));
+			}
+		}
+	}
+#else
 	int16_t t1,t2,t3;
 	int16_t zeta1,zeta2;
 	
@@ -135,6 +226,7 @@ void ntt(int16_t r[NTRUPLUS_N], const int16_t a[NTRUPLUS_N])
 			}
 		}
 	}
+#endif
 }
 
 /*************************************************
@@ -148,6 +240,72 @@ void ntt(int16_t r[NTRUPLUS_N], const int16_t a[NTRUPLUS_N])
 **************************************************/
 void invntt(int16_t r[NTRUPLUS_N], const int16_t a[NTRUPLUS_N])
 {
+#if defined(NTRUPLUS_HAVE_NEON)
+	int k = 143;
+
+	for(int i = 0; i < NTRUPLUS_N; i += 4)
+	{
+		int16x4_t v = vld1_s16(a + i);
+		vst1_s16(r + i, v);
+	}
+
+	for(int step = 4; step <= 16; step <<= 1)
+	{
+		for(int start = 0; start < NTRUPLUS_N; start += (step << 1))
+		{
+			int16_t zeta = zetas[k--];
+
+			for(int i = start; i < start + step; i += 4)
+			{
+				int16x4_t r0 = vld1_s16(r + i);
+				int16x4_t r1 = vld1_s16(r + i + step);
+				int16x4_t sum = vadd_s16(r0, r1);
+				int16x4_t diff = vsub_s16(r1, r0);
+
+				vst1_s16(r + i, barrett_reduce_vec4(sum));
+				vst1_s16(r + i + step, fqmul_vec4_const(diff, zeta));
+			}
+		}
+	}
+
+	for(int step = 32; step <= NTRUPLUS_N/6; step = 3*step)
+	{
+		for(int start = 0; start < NTRUPLUS_N; start += 3*step)
+		{
+			int16_t zeta2 = zetas[k--];
+			int16_t zeta1 = zetas[k--];
+
+			for(int i = start; i < start + step; i += 4)
+			{
+				int16x4_t r0 = vld1_s16(r + i);
+				int16x4_t r1 = vld1_s16(r + i + step);
+				int16x4_t r2 = vld1_s16(r + i + 2*step);
+				int16x4_t diff1 = vsub_s16(r1, r0);
+				int16x4_t t1 = fqmul_vec4_const(diff1, -886);
+				int16x4_t t2 = fqmul_vec4_const(vadd_s16(vsub_s16(r2, r0), t1), zeta1);
+				int16x4_t t3 = fqmul_vec4_const(vsub_s16(vsub_s16(r2, r1), t1), zeta2);
+
+				vst1_s16(r + i, barrett_reduce_vec4(vadd_s16(vadd_s16(r0, r1), r2)));
+				vst1_s16(r + i + step, t2);
+				vst1_s16(r + i + 2*step, t3);
+			}
+		}
+	}
+
+	for(int i = 0; i < NTRUPLUS_N/2; i += 4)
+	{
+		int16x4_t r0 = vld1_s16(r + i);
+		int16x4_t r1 = vld1_s16(r + i + NTRUPLUS_N/2);
+		int16x4_t t1 = vadd_s16(r0, r1);
+		int16x4_t diff = vsub_s16(r0, r1);
+		int16x4_t t2 = fqmul_vec4_const(diff, -1665);
+		int16x4_t out0 = fqmul_vec4_const(vsub_s16(t1, t2), -66);
+		int16x4_t out1 = fqmul_vec4_const(t2, -132);
+
+		vst1_s16(r + i, out0);
+		vst1_s16(r + i + NTRUPLUS_N/2, out1);
+	}
+#else
 	int16_t t1, t2, t3;
 	int16_t zeta1, zeta2;
 	int k = 143;
@@ -201,6 +359,7 @@ void invntt(int16_t r[NTRUPLUS_N], const int16_t a[NTRUPLUS_N])
 		r[i               ] = fqmul(-66, t1 - t2);
 		r[i + NTRUPLUS_N/2] = fqmul(-132, t2);
 	}
+#endif
 }
 
 /*************************************************
