@@ -13,7 +13,6 @@
         target_include_directories(ntru_plus_kem576_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
     endif()
 
-    # --- 777
     if(OQS_ENABLE_KEM_ntru_plus_kem777)
         add_library(ntru_plus_kem777_clean OBJECT
                 KpqClean_ver2_NTRU_PLUS_KEM777_clean/kem.c
@@ -21,9 +20,11 @@
                 KpqClean_ver2_NTRU_PLUS_KEM777_clean/poly.c
                 KpqClean_ver2_NTRU_PLUS_KEM777_clean/reduce.c
                 KpqClean_ver2_NTRU_PLUS_KEM777_clean/symmetric.c
-                KpqClean_ver2_NTRU_PLUS_KEM777_clean/verify.c)
+                KpqClean_ver2_NTRU_PLUS_KEM777_clean/verify.c
+        )
         target_include_directories(ntru_plus_kem777_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU+KEM777_clean)
         target_include_directories(ntru_plus_kem777_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+        target_compile_options(ntru_plus_kem777_clean PRIVATE $<$<CONFIG:Debug>:-O0 -g -fno-inline>)
     endif()
 
     if(OQS_ENABLE_KEM_ntru_plus_kem768)

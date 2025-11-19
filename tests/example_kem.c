@@ -41,7 +41,7 @@ void cleanup_heap(uint8_t *secret_key, uint8_t *shared_secret_e,
 static OQS_STATUS example_stack(void) {
 // #ifndef OQS_ENABLE_KEM_ml_kem_768 // if ML-KEM-768 was not enabled at compile-time
 #ifndef OQS_ENABLE_KEM_ntru_plus_kem777 // if ML-KEM-768 was not enabled at compile-time
-	printf("[example_stack] OQS_KEM_ml_kem_768 was not enabled at "
+	printf("[example_stack] OQS_KEM_ml_kem_777 was not enabled at "
 	       "compile-time.\n");
 	return OQS_SUCCESS; // nothing done successfully ;-)
 #else
@@ -56,7 +56,9 @@ static OQS_STATUS example_stack(void) {
 	uint8_t shared_secret_e[OQS_KEM_ntru_plus_kem777_length_shared_secret];
 	uint8_t shared_secret_d[OQS_KEM_ntru_plus_kem777_length_shared_secret];
 
+	// 원본
 	OQS_STATUS rc = OQS_KEM_ntru_plus_kem777_keypair(public_key, secret_key);
+	// OQS_STATUS rc = (OQS_STATUS) crypto_kem_keypair2(public_key, secret_key);
 	if (rc != OQS_SUCCESS) {
 		fprintf(stderr, "ERROR: OQS_KEM_ntru_plus_kem777_keypair failed!\n");
 		cleanup_stack(secret_key, OQS_KEM_ntru_plus_kem777_length_secret_key,
