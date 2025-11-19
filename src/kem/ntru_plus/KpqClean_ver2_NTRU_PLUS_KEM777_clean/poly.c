@@ -1,9 +1,18 @@
 #include <stdint.h>
+#include <oqs/oqsconfig.h>
 #include "params.h"
 #include "poly.h"
+
+#include <stdio.h>
+
 #include "ntt.h"
 #include "reduce.h"
 #include "symmetric.h"
+
+#if defined(OQS_USE_ARM_NEON_INSTRUCTIONS) && (defined(__ARM_NEON) || defined(__ARM_NEON__))
+#include <arm_neon.h>
+#define NTRUPLUS_HAVE_NEON 1
+#endif
 
 /*************************************************
 * Name:        load16_littleendian
@@ -32,6 +41,37 @@ static uint16_t load16_littleendian(const uint8_t x[2])
 *
 * Returns:     integer in {-1,0,1} congruent to a modulo 3.
 **************************************************/
+#if defined(NTRUPLUS_HAVE_NEON)
+static inline int16x8_t crepmod3_vec(int16x8_t a)
+{
+	const int16x8_t vq = vdupq_n_s16(NTRUPLUS_Q);
+	const int16x8_t vhalf1 = vdupq_n_s16((NTRUPLUS_Q + 1)/2);
+	const int16x8_t vhalf2 = vdupq_n_s16((NTRUPLUS_Q - 1)/2);
+	const int16x8_t v255 = vdupq_n_s16(255);
+	const int16x8_t v15 = vdupq_n_s16(15);
+	const int16x8_t v3 = vdupq_n_s16(3);
+	const int16x8_t vone = vdupq_n_s16(1);
+
+	int16x8_t sign = vshrq_n_s16(a, 15);
+	a = vaddq_s16(a, vandq_s16(sign, vq));
+	a = vsubq_s16(a, vhalf1);
+	sign = vshrq_n_s16(a, 15);
+	a = vaddq_s16(a, vandq_s16(sign, vq));
+	a = vsubq_s16(a, vhalf2);
+
+	int16x8_t tmp = vaddq_s16(vshrq_n_s16(a, 8), vandq_s16(a, v255));
+	tmp = vaddq_s16(vshrq_n_s16(tmp, 4), vandq_s16(tmp, v15));
+	tmp = vaddq_s16(vshrq_n_s16(tmp, 2), vandq_s16(tmp, v3));
+	tmp = vaddq_s16(vshrq_n_s16(tmp, 2), vandq_s16(tmp, v3));
+	tmp = vsubq_s16(tmp, vdupq_n_s16(3));
+
+	int16x8_t tmp2 = vaddq_s16(tmp, vone);
+	int16x8_t mask = vshrq_n_s16(tmp2, 15);
+	mask = vandq_s16(mask, v3);
+	return vaddq_s16(tmp, mask);
+}
+#endif
+
 static int16_t crepmod3(int16_t a)
 {
 	a += (a >> 15) & NTRUPLUS_Q;
@@ -177,6 +217,33 @@ void poly_sotp(poly *r, const uint8_t *msg, const uint8_t *buf)
 {
     uint8_t tmp[NTRUPLUS_N/4];
 
+#if defined(NTRUPLUS_HAVE_NEON)
+    int i = 0;
+    const int xor_len = NTRUPLUS_N/8;
+    for(; i + 16 <= xor_len; i += 16)
+    {
+        uint8x16_t b = vld1q_u8(buf + i);
+        uint8x16_t m = vld1q_u8(msg + i);
+        vst1q_u8(tmp + i, veorq_u8(b, m));
+    }
+    for(; i < xor_len; i++)
+    {
+        tmp[i] = buf[i]^msg[i];
+    }
+
+    const int copy_len = (NTRUPLUS_N/4) - xor_len;
+    const uint8_t *buf_tail = buf + xor_len;
+    uint8_t *tmp_tail = tmp + xor_len;
+    int j = 0;
+    for(; j + 16 <= copy_len; j += 16)
+    {
+        vst1q_u8(tmp_tail + j, vld1q_u8(buf_tail + j));
+    }
+    for(; j < copy_len; j++)
+    {
+        tmp_tail[j] = buf_tail[j];
+    }
+#else
     for(int i = 0; i < NTRUPLUS_N/8; i++)
     {
          tmp[i] = buf[i]^msg[i];
@@ -186,6 +253,7 @@ void poly_sotp(poly *r, const uint8_t *msg, const uint8_t *buf)
     {
          tmp[i] = buf[i];
     }
+#endif
 
 	poly_cbd1(r, tmp);
 }
@@ -358,8 +426,22 @@ void poly_basemul_add(poly *r, const poly *a, const poly *b, const poly *c)
 **************************************************/
 void poly_sub(poly *r, const poly *a, const poly *b)
 {
+#if defined(NTRUPLUS_HAVE_NEON)
+	int i = 0;
+	for(; i + 8 <= NTRUPLUS_N; i += 8)
+	{
+		int16x8_t va = vld1q_s16(a->coeffs + i);
+		int16x8_t vb = vld1q_s16(b->coeffs + i);
+		vst1q_s16(r->coeffs + i, vsubq_s16(va, vb));
+	}
+	for(; i < NTRUPLUS_N; ++i)
+	{
+		r->coeffs[i] = a->coeffs[i] - b->coeffs[i];
+	}
+#else
 	for(int i = 0; i < NTRUPLUS_N; ++i)
 		r->coeffs[i] = a->coeffs[i] - b->coeffs[i];
+#endif
 }
 
 /*************************************************
@@ -372,8 +454,21 @@ void poly_sub(poly *r, const poly *a, const poly *b)
 **************************************************/
 void poly_triple(poly *r, const poly *a) 
 {
+#if defined(NTRUPLUS_HAVE_NEON)
+	int i = 0;
+	for(; i + 8 <= NTRUPLUS_N; i += 8)
+	{
+		int16x8_t va = vld1q_s16(a->coeffs + i);
+		vst1q_s16(r->coeffs + i, vmulq_n_s16(va, 3));
+	}
+	for(; i < NTRUPLUS_N; ++i)
+	{
+		r->coeffs[i] = 3*a->coeffs[i];
+	}
+#else
 	for(int i = 0; i < NTRUPLUS_N; ++i)
 		r->coeffs[i] = 3*a->coeffs[i];
+#endif
 }
 
 /*************************************************
@@ -386,6 +481,19 @@ void poly_triple(poly *r, const poly *a)
 **************************************************/
 void poly_crepmod3(poly *r, const poly *a)
 {
-  for(int i = 0; i < NTRUPLUS_N; i++)
-    r->coeffs[i] = crepmod3(a->coeffs[i]);
+#if defined(NTRUPLUS_HAVE_NEON)
+	int i = 0;
+	for(; i + 8 <= NTRUPLUS_N; i += 8)
+	{
+		int16x8_t va = vld1q_s16(a->coeffs + i);
+		vst1q_s16(r->coeffs + i, crepmod3_vec(va));
+	}
+	for(; i < NTRUPLUS_N; i++)
+	{
+		r->coeffs[i] = crepmod3(a->coeffs[i]);
+	}
+#else
+	for(int i = 0; i < NTRUPLUS_N; i++)
+		r->coeffs[i] = crepmod3(a->coeffs[i]);
+#endif
 }
