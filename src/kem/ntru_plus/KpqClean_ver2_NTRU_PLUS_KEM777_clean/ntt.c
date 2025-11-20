@@ -461,6 +461,20 @@ int baseinv(int16_t r[4], const int16_t a[4], int16_t zeta)
 **************************************************/
 void basemul(int16_t r[4], const int16_t a[4], const int16_t b[4], int16_t zeta)
 {
+#if defined(NTRUPLUS_HAVE_NEON)
+	int16x4_t a0 = vld1_s16(a);
+	int16x4_t b0 = vld1_s16(b);
+	int32x4_t acc = vmull_s16(vdup_lane_s16(a0, 1), vdup_lane_s16(b0, 3));
+	acc = vmlal_s16(acc, vdup_lane_s16(a0, 2), vdup_lane_s16(b0, 2));
+	acc = vmlal_s16(acc, vdup_lane_s16(a0, 3), vdup_lane_s16(b0, 1));
+	int16x4_t t = montgomery_reduce_vec4(acc);
+
+	int16x4_t out = vset_lane_s16(montgomery_reduce(t[0]*zeta + a[0]*b[0]), t, 0);
+	out = vset_lane_s16(montgomery_reduce(t[1]*zeta + a[0]*b[1] + a[1]*b[0]), out, 1);
+	out = vset_lane_s16(montgomery_reduce(t[2]*zeta + a[0]*b[2] + a[1]*b[1] + a[2]*b[0]), out, 2);
+	out = vset_lane_s16(montgomery_reduce(a[0]*b[3] + a[1]*b[2] + a[2]*b[1] + a[3]*b[0]), out, 3);
+	vst1_s16(r, out);
+#else
 	r[0] = montgomery_reduce(a[1]*b[3]+a[2]*b[2]+a[3]*b[1]);
 	r[1] = montgomery_reduce(a[2]*b[3]+a[3]*b[2]);
 	r[2] = montgomery_reduce(a[3]*b[3]);
@@ -469,6 +483,7 @@ void basemul(int16_t r[4], const int16_t a[4], const int16_t b[4], int16_t zeta)
 	r[1] = montgomery_reduce(r[1]*zeta+a[0]*b[1]+a[1]*b[0]);
 	r[2] = montgomery_reduce(r[2]*zeta+a[0]*b[2]+a[1]*b[1]+a[2]*b[0]);
 	r[3] = montgomery_reduce(a[0]*b[3]+a[1]*b[2]+a[2]*b[1]+a[3]*b[0]);
+#endif
 }
 
 /*************************************************
