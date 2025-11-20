@@ -14,6 +14,31 @@
 #define NTRUPLUS_HAVE_NEON 1
 #endif
 
+#if defined(NTRUPLUS_HAVE_NEON)
+static const int16_t cbd_shift_lo_data[8] = {0, -1, -2, -3, -4, -5, -6, -7};
+static const int16_t cbd_shift_hi_data[8] = {-8, -9, -10, -11, -12, -13, -14, -15};
+
+static inline void cbd1_expand16(int16_t out[16], uint16_t t1, uint16_t t2)
+{
+	const uint16x8_t ones = vdupq_n_u16(1);
+	const int16x8_t shift_lo = vld1q_s16(cbd_shift_lo_data);
+	const int16x8_t shift_hi = vld1q_s16(cbd_shift_hi_data);
+
+	uint16x8_t v1 = vdupq_n_u16(t1);
+	uint16x8_t v2 = vdupq_n_u16(t2);
+
+	uint16x8_t bits1_lo = vandq_u16(vshlq_u16(v1, shift_lo), ones);
+	uint16x8_t bits2_lo = vandq_u16(vshlq_u16(v2, shift_lo), ones);
+	int16x8_t diff_lo = vsubq_s16(vreinterpretq_s16_u16(bits1_lo), vreinterpretq_s16_u16(bits2_lo));
+	vst1q_s16(out, diff_lo);
+
+	uint16x8_t bits1_hi = vandq_u16(vshlq_u16(v1, shift_hi), ones);
+	uint16x8_t bits2_hi = vandq_u16(vshlq_u16(v2, shift_hi), ones);
+	int16x8_t diff_hi = vsubq_s16(vreinterpretq_s16_u16(bits1_hi), vreinterpretq_s16_u16(bits2_hi));
+	vst1q_s16(out + 8, diff_hi);
+}
+#endif
+
 /*************************************************
 * Name:        load16_littleendian
 *
@@ -171,6 +196,36 @@ void poly_cbd1(poly *r, const uint8_t buf[NTRUPLUS_N/4])
 {
 	uint16_t t1, t2;
 
+#if defined(NTRUPLUS_HAVE_NEON)
+	int16_t diff[16];
+
+	for(int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 16; j++)
+		{
+			t1 = load16_littleendian(buf + 32*i + 2*j);
+			t2 = load16_littleendian(buf + 32*i + 2*j + 72);
+			cbd1_expand16(diff, t1, t2);
+
+			for(int k = 0; k < 16; k++)
+			{
+				r->coeffs[256*i + 16*k + j] = diff[k];
+			}
+		}
+	}
+
+	for (int j = 0; j < 4; j++)
+	{
+		t1 = load16_littleendian(buf + 64 + 2*j);
+		t2 = load16_littleendian(buf + 64 + 2*j + 72);
+		cbd1_expand16(diff, t1, t2);
+
+		for(int k = 0; k < 16; k++)
+		{
+			r->coeffs[512 + 4*k + j] = diff[k];
+		}
+	}
+#else
 	for(int i = 0; i < 2; i++)
 	{
 		for (int j = 0; j < 16; j++)
@@ -201,6 +256,7 @@ void poly_cbd1(poly *r, const uint8_t buf[NTRUPLUS_N/4])
 			t2 >>= 1;
 		}
 	}
+#endif
 }
 
 /*************************************************
