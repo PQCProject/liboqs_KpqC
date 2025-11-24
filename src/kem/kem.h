@@ -102,6 +102,7 @@ extern "C" {
 #define OQS_KEM_alg_smaug_t5 "SMAUG-T5"
 /** Algorithm identifier for NTRU-Plus-KEM-576 KEM. */
 #define OQS_KEM_alg_ntru_plus_kem576 "NTRU-Plus-KEM-576"
+#define OQS_KEM_alg_ntru_plus_kem576_opt "NTRU-Plus-KEM-576-Opt"
 /** Algorithm identifier for NTRU-Plus-KEM-768 KEM. */
 #define OQS_KEM_alg_ntru_plus_kem768 "NTRU-Plus-KEM-768"
 /** Algorithm identifier for NTRU-Plus-KEM-864 KEM. */
@@ -113,7 +114,7 @@ extern "C" {
 ///// OQS_COPY_FROM_UPSTREAM_FRAGMENT_ALGS_LENGTH_START
 
 /** Number of algorithm identifiers above. */
-#define OQS_KEM_algs_length 37
+#define OQS_KEM_algs_length 38
 ///// OQS_COPY_FROM_UPSTREAM_FRAGMENT_ALGS_LENGTH_END
 
 /**
