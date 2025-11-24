@@ -289,23 +289,34 @@ void poly_invntt(poly *r, const poly *a)
 * Name:        poly_baseinv
 *
 * Description: Inversion of polynomial in NTT domain
+* (Optimized with Montgomery Batch Inversion)
 *
 * Arguments:   - poly *r:       pointer to output polynomial
-*              - const poly *a: pointer to input polynomial
-* 
-* Returns:     integer
+* - const poly *a: pointer to input polynomial
+* * Returns:     integer
 **************************************************/
 int poly_baseinv(poly *r, const poly *a)
 {
-	int result = 0;
+	int16_t determinants[NTRUPLUS_N / 4];
+	int16_t t_values[NTRUPLUS_N / 4][3];
+	int16_t inverted_determinants[NTRUPLUS_N / 4];
 
-	for(int i = 0; i < NTRUPLUS_N/8; ++i)
-	{
-		result = baseinv(r->coeffs + 8*i, a->coeffs + 8*i, zetas[72 + i]);
-		if(result) return 1;
-		result = baseinv(r->coeffs + 8*i + 4, a->coeffs + 8*i + 4, -zetas[72 + i]);
-		if(result) return 1;
-	 }
+	int i;
+	int16_t zeta;
+
+	for (i = 0; i < NTRUPLUS_N / 4; i++) {
+		zeta = zetas[NTRUPLUS_N/4 + i];
+
+		if (baseinv_calc_t_values(t_values[i], &determinants[i], &a->coeffs[4*i], zeta) != 0) {
+			return 1;
+		}
+	}
+
+	fq_batchinv(inverted_determinants, determinants, NTRUPLUS_N / 4);
+
+	for (i = 0; i < NTRUPLUS_N / 4; i++) {
+		baseinv_apply_inv(&r->coeffs[4*i], &a->coeffs[4*i], t_values[i], inverted_determinants[i]);
+	}
 
 	return 0;
 }
