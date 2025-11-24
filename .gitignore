@@ -22,6 +22,9 @@ tags
 # Jetbrains IDEs
 .idea
 
+# build
+/build-release
+
 # MacOS
 .DS_Store
 
