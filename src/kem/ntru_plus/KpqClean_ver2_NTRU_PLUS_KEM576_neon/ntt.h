@@ -2,6 +2,7 @@
 #define NTT_H
 
 #include <stdint.h>
+#include <arm_neon.h>
 #include "params.h"
 
 #define NTRUPLUS_NAMESPACE(s) kpqclean_ntruplus576_neon_##s
@@ -23,5 +24,14 @@ void basemul(int16_t r[4], const int16_t a[4], const int16_t b[4], int16_t zeta)
 
 #define basemul_add NTRUPLUS_NAMESPACE(basemul_add)
 void basemul_add(int16_t r[4], const int16_t a[4], const int16_t b[4], const int16_t c[4], int16_t zeta);
+
+#define basemul_vec8 NTRUPLUS_NAMESPACE(basemul_vec8)
+void basemul_vec8(int16_t *r, const int16_t *a, const int16_t *b, int16_t zeta);
+
+#define basemul_add_vec8 NTRUPLUS_NAMESPACE(basemul_add_vec8)
+void basemul_add_vec8(int16_t *r, const int16_t *a, const int16_t *b, const int16_t *c, int16_t zeta);
+
+#define montgomery_reduce_vec4_opt NTRUPLUS_NAMESPACE(montgomery_reduce_vec4_opt)
+int16x4_t montgomery_reduce_vec4_opt(int32x4_t a);
 
 #endif

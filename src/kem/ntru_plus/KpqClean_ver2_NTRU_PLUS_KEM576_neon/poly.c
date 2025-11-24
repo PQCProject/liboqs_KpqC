@@ -443,12 +443,22 @@ int poly_baseinv(poly *r, const poly *a)
 *              - const poly *a: pointer to first input polynomial
 *              - const poly *b: pointer to second input polynomial
 **************************************************/
+// void poly_basemul(poly *r, const poly *a, const poly *b)
+// {
+// 	for(int i = 0; i < NTRUPLUS_N/8; ++i)
+// 	{
+// 		basemul(r->coeffs + 8*i, a->coeffs + 8*i, b->coeffs + 8*i, zetas[72 + i]);
+// 		basemul(r->coeffs + 8*i + 4, a->coeffs + 8*i + 4, b->coeffs + 8*i + 4, -zetas[72 + i]);
+// 	}
+// }
 void poly_basemul(poly *r, const poly *a, const poly *b)
 {
-	for(int i = 0; i < NTRUPLUS_N/8; ++i)
+	// 8개씩(2블록) 처리하므로 루프 횟수 절반 감소
+	for(int i = 0; i < NTRUPLUS_N; i += 8)
 	{
-		basemul(r->coeffs + 8*i, a->coeffs + 8*i, b->coeffs + 8*i, zetas[72 + i]);
-		basemul(r->coeffs + 8*i + 4, a->coeffs + 8*i + 4, b->coeffs + 8*i + 4, -zetas[72 + i]);
+		// zetas[72 + i/8] 값을 사용.
+		// basemul_vec8 내부에서 두 번째 블록용 -zeta는 자동 생성함.
+		basemul_vec8(r->coeffs + i, a->coeffs + i, b->coeffs + i, zetas[72 + i/8]);
 	}
 }
 
@@ -462,12 +472,19 @@ void poly_basemul(poly *r, const poly *a, const poly *b)
 *              - const poly *b: pointer to second input polynomial
 *              - const poly *c: pointer to third input polynomial
 **************************************************/
+// void poly_basemul_add(poly *r, const poly *a, const poly *b, const poly *c)
+// {
+// 	for(int i = 0; i < NTRUPLUS_N/8; ++i)
+// 	{
+// 		basemul_add(r->coeffs + 8*i, a->coeffs + 8*i, b->coeffs + 8*i, c->coeffs + 8*i, zetas[72 + i]);
+// 		basemul_add(r->coeffs + 8*i + 4, a->coeffs + 8*i + 4, b->coeffs + 8*i + 4, c->coeffs + 8*i + 4, -zetas[72 + i]);
+// 	}
+// }
 void poly_basemul_add(poly *r, const poly *a, const poly *b, const poly *c)
 {
-	for(int i = 0; i < NTRUPLUS_N/8; ++i)
+	for(int i = 0; i < NTRUPLUS_N; i += 8)
 	{
-		basemul_add(r->coeffs + 8*i, a->coeffs + 8*i, b->coeffs + 8*i, c->coeffs + 8*i, zetas[72 + i]);
-		basemul_add(r->coeffs + 8*i + 4, a->coeffs + 8*i + 4, b->coeffs + 8*i + 4, c->coeffs + 8*i + 4, -zetas[72 + i]);
+		basemul_add_vec8(r->coeffs + i, a->coeffs + i, b->coeffs + i, c->coeffs + i, zetas[72 + i/8]);
 	}
 }
 
