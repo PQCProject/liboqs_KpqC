@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define NTRUPLUS_NAMESPACE(s) kpqclean_ntruplus576_clean_##s
+#define NTRUPLUS_NAMESPACE(s) kpqclean_ntruplus576_opt_##s
 
 #define QINV 12929 // q^(-1) mod 2^16
 

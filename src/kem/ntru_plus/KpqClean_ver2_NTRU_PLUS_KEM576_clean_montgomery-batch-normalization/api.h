@@ -8,7 +8,7 @@
 #define CRYPTO_CIPHERTEXTBYTES NTRUPLUS_CIPHERTEXTBYTES
 #define CRYPTO_BYTES           NTRUPLUS_SSBYTES
 
-#define NTRUPLUS_NAMESPACE(s) kpqclean_ntruplus576_clean_##s
+#define NTRUPLUS_NAMESPACE(s) kpqclean_ntruplus576_opt_##s
 
 #define crypto_kem_keypair NTRUPLUS_NAMESPACE(crypto_kem_keypair)
 #define crypto_kem_enc NTRUPLUS_NAMESPACE(crypto_kem_enc)

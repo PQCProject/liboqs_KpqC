@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "params.h"
 
-#define NTRUPLUS_NAMESPACE(s) kpqclean_ntruplus576_clean_##s
+#define NTRUPLUS_NAMESPACE(s) kpqclean_ntruplus576_opt_##s
 
 #define zetas NTRUPLUS_NAMESPACE(zetas)
 extern const int16_t zetas[144];
