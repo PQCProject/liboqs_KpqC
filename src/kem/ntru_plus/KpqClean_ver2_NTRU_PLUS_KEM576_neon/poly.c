@@ -15,6 +15,10 @@
 #endif
 
 #if defined(NTRUPLUS_HAVE_NEON)
+int poly_baseinv_neon(poly *r, const poly *a);
+#endif
+
+#if defined(NTRUPLUS_HAVE_NEON)
 static const int16_t cbd_shift_lo_data[8] = {0, -1, -2, -3, -4, -5, -6, -7};
 static const int16_t cbd_shift_hi_data[8] = {-8, -9, -10, -11, -12, -13, -14, -15};
 
@@ -421,6 +425,10 @@ void poly_invntt(poly *r, const poly *a)
 **************************************************/
 int poly_baseinv(poly *r, const poly *a)
 {
+#if defined(NTRUPLUS_HAVE_NEON)
+	return poly_baseinv_neon(r, a);
+#else
+	// 기존 스칼라 코드
 	int result = 0;
 
 	for(int i = 0; i < NTRUPLUS_N/8; ++i)
@@ -429,9 +437,10 @@ int poly_baseinv(poly *r, const poly *a)
 		if(result) return 1;
 		result = baseinv(r->coeffs + 8*i + 4, a->coeffs + 8*i + 4, -zetas[72 + i]);
 		if(result) return 1;
-	 }
+	}
 
 	return 0;
+#endif
 }
 
 /*************************************************
