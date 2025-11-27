@@ -200,7 +200,6 @@ void poly_cbd1(poly *r, const uint8_t buf[NTRUPLUS_N/4])
 {
 	uint16_t t1, t2;
 
-#if defined(NTRUPLUS_HAVE_NEON)
 	int16_t diff[16];
 
 	for(int i = 0; i < 2; i++)
@@ -229,38 +228,7 @@ void poly_cbd1(poly *r, const uint8_t buf[NTRUPLUS_N/4])
 			r->coeffs[512 + 4*k + j] = diff[k];
 		}
 	}
-#else
-	for(int i = 0; i < 2; i++)
-	{
-		for (int j = 0; j < 16; j++)
-		{
-			t1 = load16_littleendian(buf + 32*i + 2*j);
-			t2 = load16_littleendian(buf + 32*i + 2*j + 72);
 
-			for(int k = 0; k < 16; k++)
-			{
-				r->coeffs[256*i + 16*k + j] = (t1 & 0x1) - (t2 & 0x1);
-
-				t1 >>= 1;   
-				t2 >>= 1;
-			}
-		}
-	}
-
-	for (int j = 0; j < 4; j++)
-	{
-		t1 = load16_littleendian(buf + 64 + 2*j);
-		t2 = load16_littleendian(buf + 64 + 2*j + 72);
-
-		for(int k = 0; k < 16; k++)
-		{
-			r->coeffs[512 + 4*k + j] = (t1 & 0x1) - (t2 & 0x1);
-
-			t1 >>= 1;   
-			t2 >>= 1;
-		}
-	}
-#endif
 }
 
 /*************************************************
@@ -277,7 +245,6 @@ void poly_sotp(poly *r, const uint8_t *msg, const uint8_t *buf)
 {
     uint8_t tmp[NTRUPLUS_N/4];
 
-#if defined(NTRUPLUS_HAVE_NEON)
     int i = 0;
     const int xor_len = NTRUPLUS_N/8;
     for(; i + 16 <= xor_len; i += 16)
@@ -303,17 +270,6 @@ void poly_sotp(poly *r, const uint8_t *msg, const uint8_t *buf)
     {
         tmp_tail[j] = buf_tail[j];
     }
-#else
-    for(int i = 0; i < NTRUPLUS_N/8; i++)
-    {
-         tmp[i] = buf[i]^msg[i];
-    }
-
-    for(int i = NTRUPLUS_N/8; i < NTRUPLUS_N/4; i++)
-    {
-         tmp[i] = buf[i];
-    }
-#endif
 
 	poly_cbd1(r, tmp);
 }
@@ -425,22 +381,7 @@ void poly_invntt(poly *r, const poly *a)
 **************************************************/
 int poly_baseinv(poly *r, const poly *a)
 {
-#if defined(NTRUPLUS_HAVE_NEON)
 	return poly_baseinv_neon(r, a);
-#else
-	// 기존 스칼라 코드
-	int result = 0;
-
-	for(int i = 0; i < NTRUPLUS_N/8; ++i)
-	{
-		result = baseinv(r->coeffs + 8*i, a->coeffs + 8*i, zetas[72 + i]);
-		if(result) return 1;
-		result = baseinv(r->coeffs + 8*i + 4, a->coeffs + 8*i + 4, -zetas[72 + i]);
-		if(result) return 1;
-	}
-
-	return 0;
-#endif
 }
 
 /*************************************************
@@ -508,7 +449,6 @@ void poly_basemul_add(poly *r, const poly *a, const poly *b, const poly *c)
 **************************************************/
 void poly_sub(poly *r, const poly *a, const poly *b)
 {
-#if defined(NTRUPLUS_HAVE_NEON)
 	int i = 0;
 	for(; i + 8 <= NTRUPLUS_N; i += 8)
 	{
@@ -520,10 +460,6 @@ void poly_sub(poly *r, const poly *a, const poly *b)
 	{
 		r->coeffs[i] = a->coeffs[i] - b->coeffs[i];
 	}
-#else
-	for(int i = 0; i < NTRUPLUS_N; ++i)
-		r->coeffs[i] = a->coeffs[i] - b->coeffs[i];
-#endif
 }
 
 /*************************************************
@@ -536,7 +472,6 @@ void poly_sub(poly *r, const poly *a, const poly *b)
 **************************************************/
 void poly_triple(poly *r, const poly *a) 
 {
-#if defined(NTRUPLUS_HAVE_NEON)
 	int i = 0;
 	for(; i + 8 <= NTRUPLUS_N; i += 8)
 	{
@@ -547,10 +482,6 @@ void poly_triple(poly *r, const poly *a)
 	{
 		r->coeffs[i] = 3*a->coeffs[i];
 	}
-#else
-	for(int i = 0; i < NTRUPLUS_N; ++i)
-		r->coeffs[i] = 3*a->coeffs[i];
-#endif
 }
 
 /*************************************************
@@ -563,7 +494,6 @@ void poly_triple(poly *r, const poly *a)
 **************************************************/
 void poly_crepmod3(poly *r, const poly *a)
 {
-#if defined(NTRUPLUS_HAVE_NEON)
 	int i = 0;
 	for(; i + 8 <= NTRUPLUS_N; i += 8)
 	{
@@ -574,8 +504,4 @@ void poly_crepmod3(poly *r, const poly *a)
 	{
 		r->coeffs[i] = crepmod3(a->coeffs[i]);
 	}
-#else
-	for(int i = 0; i < NTRUPLUS_N; i++)
-		r->coeffs[i] = crepmod3(a->coeffs[i]);
-#endif
 }
