@@ -228,7 +228,6 @@ void poly_cbd1(poly *r, const uint8_t buf[NTRUPLUS_N/4])
 			r->coeffs[512 + 4*k + j] = diff[k];
 		}
 	}
-
 }
 
 /*************************************************
