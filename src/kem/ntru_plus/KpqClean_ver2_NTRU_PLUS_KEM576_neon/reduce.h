@@ -7,10 +7,10 @@
 
 #define QINV 12929 // q^(-1) mod 2^16
 
-#define montgomery_reduce NTRUPLUS_NAMESPACE(montgomery_reduce)
-int16_t montgomery_reduce(int32_t a);
+// #define montgomery_reduce NTRUPLUS_NAMESPACE(montgomery_reduce)
+// int16_t montgomery_reduce(int32_t a);
 
-#define barrett_reduce NTRUPLUS_NAMESPACE(barrett_reduce)
-int16_t barrett_reduce(int16_t a);
+// #define barrett_reduce NTRUPLUS_NAMESPACE(barrett_reduce)
+// int16_t barrett_reduce(int16_t a);
 
 #endif

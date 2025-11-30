@@ -353,10 +353,10 @@ inline int16x4_t montgomery_reduce_vec4_opt(int32x4_t a) {
 *
 * Returns 16-bit integer congruent to a*b*R^{-1} mod q
 **************************************************/
-static int16_t fqmul(int16_t a, int16_t b)
-{
-	return montgomery_reduce((int32_t)a*b);
-}
+// static int16_t fqmul(int16_t a, int16_t b)
+// {
+// 	return montgomery_reduce((int32_t)a*b);
+// }
 
 /*************************************************
 * Name:        fqinv
@@ -367,33 +367,33 @@ static int16_t fqmul(int16_t a, int16_t b)
 *
 * Returns 16-bit integer congruent to x^{-1} * R^2 mod q
 **************************************************/
-static int16_t fqinv(int16_t a)
-{
-	int16_t t1,t2,t3;
-
-	t1 = fqmul(a, a);    //10
-	t2 = fqmul(t1, t1);  //100
-	t2 = fqmul(t2, t2);  //1000
-	t3 = fqmul(t2, t2);  //10000
-
-	t1 = fqmul(t1, t2);  //1010
-
-	t2 = fqmul(t1, t3);  //11010
-	t2 = fqmul(t2, t2);  //110100
-	t2 = fqmul(t2, a);   //110101
-
-	t1 = fqmul(t1, t2);  //111111
-
-	t2 = fqmul(t2, t2);  //1101010
-	t2 = fqmul(t2, t2);  //11010100
-	t2 = fqmul(t2, t2);  //110101000
-	t2 = fqmul(t2, t2);  //1101010000
-	t2 = fqmul(t2, t2);  //11010100000
-	t2 = fqmul(t2, t2);  //110101000000
-	t2 = fqmul(t2, t1);  //110101111111
-
-	return t2;
-}
+// static int16_t fqinv(int16_t a)
+// {
+// 	int16_t t1,t2,t3;
+//
+// 	t1 = fqmul(a, a);    //10
+// 	t2 = fqmul(t1, t1);  //100
+// 	t2 = fqmul(t2, t2);  //1000
+// 	t3 = fqmul(t2, t2);  //10000
+//
+// 	t1 = fqmul(t1, t2);  //1010
+//
+// 	t2 = fqmul(t1, t3);  //11010
+// 	t2 = fqmul(t2, t2);  //110100
+// 	t2 = fqmul(t2, a);   //110101
+//
+// 	t1 = fqmul(t1, t2);  //111111
+//
+// 	t2 = fqmul(t2, t2);  //1101010
+// 	t2 = fqmul(t2, t2);  //11010100
+// 	t2 = fqmul(t2, t2);  //110101000
+// 	t2 = fqmul(t2, t2);  //1101010000
+// 	t2 = fqmul(t2, t2);  //11010100000
+// 	t2 = fqmul(t2, t2);  //110101000000
+// 	t2 = fqmul(t2, t1);  //110101111111
+//
+// 	return t2;
+// }
 
 /*************************************************
 * Name:        ntt
@@ -582,17 +582,17 @@ void invntt(int16_t r[NTRUPLUS_N], const int16_t a[NTRUPLUS_N]) {
 *              - const int16_t b[4]: pointer to the second factor
 *              - int16_t zeta: integer defining the reduction polynomial
 **************************************************/
-void basemul(int16_t r[4], const int16_t a[4], const int16_t b[4], int16_t zeta)
-{
-	r[0] = montgomery_reduce(a[1]*b[3]+a[2]*b[2]+a[3]*b[1]);
-	r[1] = montgomery_reduce(a[2]*b[3]+a[3]*b[2]);
-	r[2] = montgomery_reduce(a[3]*b[3]);
-
-	r[0] = montgomery_reduce(r[0]*zeta+a[0]*b[0]);
-	r[1] = montgomery_reduce(r[1]*zeta+a[0]*b[1]+a[1]*b[0]);
-	r[2] = montgomery_reduce(r[2]*zeta+a[0]*b[2]+a[1]*b[1]+a[2]*b[0]);
-	r[3] = montgomery_reduce(a[0]*b[3]+a[1]*b[2]+a[2]*b[1]+a[3]*b[0]);
-}
+// void basemul(int16_t r[4], const int16_t a[4], const int16_t b[4], int16_t zeta)
+// {
+// 	r[0] = montgomery_reduce(a[1]*b[3]+a[2]*b[2]+a[3]*b[1]);
+// 	r[1] = montgomery_reduce(a[2]*b[3]+a[3]*b[2]);
+// 	r[2] = montgomery_reduce(a[3]*b[3]);
+//
+// 	r[0] = montgomery_reduce(r[0]*zeta+a[0]*b[0]);
+// 	r[1] = montgomery_reduce(r[1]*zeta+a[0]*b[1]+a[1]*b[0]);
+// 	r[2] = montgomery_reduce(r[2]*zeta+a[0]*b[2]+a[1]*b[1]+a[2]*b[0]);
+// 	r[3] = montgomery_reduce(a[0]*b[3]+a[1]*b[2]+a[2]*b[1]+a[3]*b[0]);
+// }
 
 /*************************************************
 * Name:        basemul_add
@@ -606,14 +606,14 @@ void basemul(int16_t r[4], const int16_t a[4], const int16_t b[4], int16_t zeta)
 *              - const int16_t c[4]: pointer to the third factor
 *              - int16_t zeta: integer defining the reduction polynomial
 **************************************************/
-void basemul_add(int16_t r[4], const int16_t a[4], const int16_t b[4], const int16_t c[4], int16_t zeta)
-{
-	r[0] = montgomery_reduce(a[1]*b[3]+a[2]*b[2]+a[3]*b[1]);
-	r[1] = montgomery_reduce(a[2]*b[3]+a[3]*b[2]);
-	r[2] = montgomery_reduce(a[3]*b[3]);
-
-	r[0] = montgomery_reduce(c[0]*(-147)+r[0]*zeta+a[0]*b[0]);
-	r[1] = montgomery_reduce(c[1]*(-147)+r[1]*zeta+a[0]*b[1]+a[1]*b[0]);
-	r[2] = montgomery_reduce(c[2]*(-147)+r[2]*zeta+a[0]*b[2]+a[1]*b[1]+a[2]*b[0]);
-	r[3] = montgomery_reduce(c[3]*(-147)+a[0]*b[3]+a[1]*b[2]+a[2]*b[1]+a[3]*b[0]);
-}
+// void basemul_add(int16_t r[4], const int16_t a[4], const int16_t b[4], const int16_t c[4], int16_t zeta)
+// {
+// 	r[0] = montgomery_reduce(a[1]*b[3]+a[2]*b[2]+a[3]*b[1]);
+// 	r[1] = montgomery_reduce(a[2]*b[3]+a[3]*b[2]);
+// 	r[2] = montgomery_reduce(a[3]*b[3]);
+//
+// 	r[0] = montgomery_reduce(c[0]*(-147)+r[0]*zeta+a[0]*b[0]);
+// 	r[1] = montgomery_reduce(c[1]*(-147)+r[1]*zeta+a[0]*b[1]+a[1]*b[0]);
+// 	r[2] = montgomery_reduce(c[2]*(-147)+r[2]*zeta+a[0]*b[2]+a[1]*b[1]+a[2]*b[0]);
+// 	r[3] = montgomery_reduce(c[3]*(-147)+a[0]*b[3]+a[1]*b[2]+a[2]*b[1]+a[3]*b[0]);
+// }
