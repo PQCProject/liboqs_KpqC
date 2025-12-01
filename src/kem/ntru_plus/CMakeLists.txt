@@ -1,165 +1,180 @@
-    # SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: MIT
 
-    # --- NTRU-Plus clean implementations ---
-    if(OQS_ENABLE_KEM_ntru_plus_kem576)
-        add_library(ntru_plus_kem576_clean OBJECT
+# --- NTRU-Plus clean implementations ---
+if(OQS_ENABLE_KEM_ntru_plus_kem576)
+    add_library(ntru_plus_kem576_clean OBJECT
             KpqClean_ver2_NTRU_PLUS_KEM576_clean/kem.c
             KpqClean_ver2_NTRU_PLUS_KEM576_clean/ntt.c
             KpqClean_ver2_NTRU_PLUS_KEM576_clean/poly.c
             KpqClean_ver2_NTRU_PLUS_KEM576_clean/reduce.c
             KpqClean_ver2_NTRU_PLUS_KEM576_clean/symmetric.c
             KpqClean_ver2_NTRU_PLUS_KEM576_clean/verify.c)
-        target_include_directories(ntru_plus_kem576_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU+KEM576_clean)
-        target_include_directories(ntru_plus_kem576_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
-    endif()
+    target_include_directories(ntru_plus_kem576_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM576_clean)
+    target_include_directories(ntru_plus_kem576_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+endif()
 
-    if(OQS_ENABLE_KEM_ntru_plus_kem576_neon)
-        add_library(ntru_plus_kem576_neon OBJECT
-                KpqClean_ver2_NTRU_PLUS_KEM576_neon/kem.c
-                KpqClean_ver2_NTRU_PLUS_KEM576_neon/ntt.c
-                KpqClean_ver2_NTRU_PLUS_KEM576_neon/poly.c
-                KpqClean_ver2_NTRU_PLUS_KEM576_neon/reduce.c
-                KpqClean_ver2_NTRU_PLUS_KEM576_neon/symmetric.c
-                KpqClean_ver2_NTRU_PLUS_KEM576_neon/verify.c
-        )
-        target_include_directories(ntru_plus_kem576_neon PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU+KEM576_neon)
-        target_include_directories(ntru_plus_kem576_neon PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
-        target_compile_options(ntru_plus_kem576_neon PRIVATE $<$<CONFIG:Debug>:-O0 -g -fno-inline>)
-    endif()
+# --- [NEW] Optimized Implementation (Batch Inversion) ---
+if(OQS_ENABLE_KEM_ntru_plus_kem576)
+    add_library(ntru_plus_kem576_opt OBJECT
+            KpqClean_ver2_NTRU_PLUS_KEM576_clean_montgomery-batch-normalization/kem.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_clean_montgomery-batch-normalization/ntt.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_clean_montgomery-batch-normalization/poly.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_clean_montgomery-batch-normalization/reduce.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_clean_montgomery-batch-normalization/symmetric.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_clean_montgomery-batch-normalization/verify.c)
 
-    if(OQS_ENABLE_KEM_ntru_plus_kem768)
-        add_library(ntru_plus_kem768_clean OBJECT
+    target_include_directories(ntru_plus_kem576_opt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM576_clean_montgomery-batch-normalization)
+    target_include_directories(ntru_plus_kem576_opt PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+endif()
+
+# --- [Main Branch] Neon Implementation ---
+if(OQS_ENABLE_KEM_ntru_plus_kem576_neon)
+    add_library(ntru_plus_kem576_neon OBJECT
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/kem.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/ntt.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/poly.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/reduce.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/symmetric.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/verify.c
+    )
+    target_include_directories(ntru_plus_kem576_neon PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU+KEM576_neon)
+    target_include_directories(ntru_plus_kem576_neon PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+    target_compile_options(ntru_plus_kem576_neon PRIVATE $<$<CONFIG:Debug>:-O0 -g -fno-inline>)
+endif()
+
+if(OQS_ENABLE_KEM_ntru_plus_kem768)
+    add_library(ntru_plus_kem768_clean OBJECT
             KpqClean_ver2_NTRU_PLUS_KEM768_clean/kem.c
             KpqClean_ver2_NTRU_PLUS_KEM768_clean/ntt.c
             KpqClean_ver2_NTRU_PLUS_KEM768_clean/poly.c
             KpqClean_ver2_NTRU_PLUS_KEM768_clean/reduce.c
             KpqClean_ver2_NTRU_PLUS_KEM768_clean/symmetric.c
             KpqClean_ver2_NTRU_PLUS_KEM768_clean/verify.c)
-        target_include_directories(ntru_plus_kem768_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM768_clean)
-        target_include_directories(ntru_plus_kem768_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
-    endif()
+    target_include_directories(ntru_plus_kem768_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM768_clean)
+    target_include_directories(ntru_plus_kem768_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+endif()
 
-    if(OQS_ENABLE_KEM_ntru_plus_kem864)
-        add_library(ntru_plus_kem864_clean OBJECT
+if(OQS_ENABLE_KEM_ntru_plus_kem864)
+    add_library(ntru_plus_kem864_clean OBJECT
             KpqClean_ver2_NTRU_PLUS_KEM864_clean/kem.c
             KpqClean_ver2_NTRU_PLUS_KEM864_clean/ntt.c
             KpqClean_ver2_NTRU_PLUS_KEM864_clean/poly.c
             KpqClean_ver2_NTRU_PLUS_KEM864_clean/reduce.c
             KpqClean_ver2_NTRU_PLUS_KEM864_clean/symmetric.c
             KpqClean_ver2_NTRU_PLUS_KEM864_clean/verify.c)
-        target_include_directories(ntru_plus_kem864_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM864_clean)
-        target_include_directories(ntru_plus_kem864_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
-    endif()
+    target_include_directories(ntru_plus_kem864_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM864_clean)
+    target_include_directories(ntru_plus_kem864_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+endif()
 
-    if(OQS_ENABLE_KEM_ntru_plus_kem1152)
-        add_library(ntru_plus_kem1152_clean OBJECT
+if(OQS_ENABLE_KEM_ntru_plus_kem1152)
+    add_library(ntru_plus_kem1152_clean OBJECT
             KpqClean_ver2_NTRU_PLUS_KEM1152_clean/kem.c
             KpqClean_ver2_NTRU_PLUS_KEM1152_clean/ntt.c
             KpqClean_ver2_NTRU_PLUS_KEM1152_clean/poly.c
             KpqClean_ver2_NTRU_PLUS_KEM1152_clean/reduce.c
             KpqClean_ver2_NTRU_PLUS_KEM1152_clean/symmetric.c
             KpqClean_ver2_NTRU_PLUS_KEM1152_clean/verify.c)
-        target_include_directories(ntru_plus_kem1152_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM1152_clean)
-        target_include_directories(ntru_plus_kem1152_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
-    endif()
+    target_include_directories(ntru_plus_kem1152_clean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM1152_clean)
+    target_include_directories(ntru_plus_kem1152_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+endif()
 
 
 
-    # --- AIMer AVX2 implementations ---
-    if( OQS_ENABLE_KEM_ntru_plus_kem576_avx2)
-        add_library(ntru_plus_kem576_avx2 OBJECT
+# --- AIMer AVX2 implementations ---
+if( OQS_ENABLE_KEM_ntru_plus_kem576_avx2)
+    add_library(ntru_plus_kem576_avx2 OBJECT
             KpqClean_ver2_NTRU_PLUS_KEM576_avx2/consts.c
             KpqClean_ver2_NTRU_PLUS_KEM576_avx2/kem.c
             KpqClean_ver2_NTRU_PLUS_KEM576_avx2/poly.c
             KpqClean_ver2_NTRU_PLUS_KEM576_avx2/symmetric.c
             KpqClean_ver2_NTRU_PLUS_KEM576_avx2/verify.c)
-        target_include_directories(ntru_plus_kem576_avx2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM576_avx2)
-        target_include_directories(ntru_plus_kem576_avx2 PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
-        target_compile_definitions(ntru_plus_kem576_avx2 PRIVATE NTRU_PLUS_MODE=576)
-        target_compile_options(ntru_plus_kem576_avx2 PRIVATE -mavx2 -mpopcnt)
-    endif()
+    target_include_directories(ntru_plus_kem576_avx2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM576_avx2)
+    target_include_directories(ntru_plus_kem576_avx2 PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+    target_compile_definitions(ntru_plus_kem576_avx2 PRIVATE NTRU_PLUS_MODE=576)
+    target_compile_options(ntru_plus_kem576_avx2 PRIVATE -mavx2 -mpopcnt)
+endif()
 
-    if(OQS_ENABLE_KEM_ntru_plus_kem768_avx2)
-        add_library(ntru_plus_kem768_avx2 OBJECT
+if(OQS_ENABLE_KEM_ntru_plus_kem768_avx2)
+    add_library(ntru_plus_kem768_avx2 OBJECT
             KpqClean_ver2_NTRU_PLUS_KEM768_avx2/consts.c
             KpqClean_ver2_NTRU_PLUS_KEM768_avx2/kem.c
             KpqClean_ver2_NTRU_PLUS_KEM768_avx2/poly.c
             KpqClean_ver2_NTRU_PLUS_KEM768_avx2/symmetric.c
             KpqClean_ver2_NTRU_PLUS_KEM768_avx2/verify.c)
-        target_include_directories(ntru_plus_kem768_avx2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM768_avx2)
-        target_include_directories(ntru_plus_kem768_avx2 PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
-        target_compile_definitions(ntru_plus_kem768_avx2 PRIVATE NTRU_PLUS_MODE=768)
-        target_compile_options(ntru_plus_kem768_avx2 PRIVATE -mavx2 -mpopcnt)
-    endif()
+    target_include_directories(ntru_plus_kem768_avx2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM768_avx2)
+    target_include_directories(ntru_plus_kem768_avx2 PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+    target_compile_definitions(ntru_plus_kem768_avx2 PRIVATE NTRU_PLUS_MODE=768)
+    target_compile_options(ntru_plus_kem768_avx2 PRIVATE -mavx2 -mpopcnt)
+endif()
 
-    if(OQS_ENABLE_KEM_ntru_plus_kem864_avx2)
-        add_library(ntru_plus_kem864_avx2 OBJECT
+if(OQS_ENABLE_KEM_ntru_plus_kem864_avx2)
+    add_library(ntru_plus_kem864_avx2 OBJECT
             KpqClean_ver2_NTRU_PLUS_KEM864_avx2/consts.c
             KpqClean_ver2_NTRU_PLUS_KEM864_avx2/kem.c
             KpqClean_ver2_NTRU_PLUS_KEM864_avx2/poly.c
             KpqClean_ver2_NTRU_PLUS_KEM864_avx2/symmetric.c
             KpqClean_ver2_NTRU_PLUS_KEM864_avx2/verify.c)
-        target_include_directories(ntru_plus_kem864_avx2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM864_avx2)
-        target_include_directories(ntru_plus_kem864_avx2 PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
-        target_compile_definitions(ntru_plus_kem864_avx2 PRIVATE NTRU_PLUS_MODE=864)
-        target_compile_options(ntru_plus_kem864_avx2 PRIVATE -mavx2 -mpopcnt)
-    endif()
+    target_include_directories(ntru_plus_kem864_avx2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM864_avx2)
+    target_include_directories(ntru_plus_kem864_avx2 PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+    target_compile_definitions(ntru_plus_kem864_avx2 PRIVATE NTRU_PLUS_MODE=864)
+    target_compile_options(ntru_plus_kem864_avx2 PRIVATE -mavx2 -mpopcnt)
+endif()
 
-    if(OQS_ENABLE_KEM_ntru_plus_kem1152_avx2)
-        add_library(ntru_plus_kem1152_avx2 OBJECT
+if(OQS_ENABLE_KEM_ntru_plus_kem1152_avx2)
+    add_library(ntru_plus_kem1152_avx2 OBJECT
             KpqClean_ver2_NTRU_PLUS_KEM1152_avx2/consts.c
             KpqClean_ver2_NTRU_PLUS_KEM1152_avx2/kem.c
             KpqClean_ver2_NTRU_PLUS_KEM1152_avx2/poly.c
             KpqClean_ver2_NTRU_PLUS_KEM1152_avx2/symmetric.c
             KpqClean_ver2_NTRU_PLUS_KEM1152_avx2/verify.c)
-        target_include_directories(ntru_plus_kem1152_avx2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM1152_avx2)
-        target_include_directories(ntru_plus_kem1152_avx2 PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
-        target_compile_definitions(ntru_plus_kem1152_avx2 PRIVATE NTRU_PLUS_MODE=1152)
-        target_compile_options(ntru_plus_kem1152_avx2 PRIVATE -mavx2 -mpopcnt)
-    endif()
+    target_include_directories(ntru_plus_kem1152_avx2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU_PLUS_KEM1152_avx2)
+    target_include_directories(ntru_plus_kem1152_avx2 PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+    target_compile_definitions(ntru_plus_kem1152_avx2 PRIVATE NTRU_PLUS_MODE=1152)
+    target_compile_options(ntru_plus_kem1152_avx2 PRIVATE -mavx2 -mpopcnt)
+endif()
 
-    # --- AIMer wrapper objects ---
-    add_library(ntru_plus_impl OBJECT
+# --- AIMer wrapper objects ---
+add_library(ntru_plus_impl OBJECT
         kem_ntru_plus_kem576.c
-        kem_ntru_plus_kem576_neon.c
+        kem_ntru_plus_kem576_opt.c  # [Opt] 사용자 버전
+        kem_ntru_plus_kem576_neon.c # [Neon] Main 브랜치 버전
         kem_ntru_plus_kem768.c
         kem_ntru_plus_kem864.c
         kem_ntru_plus_kem1152.c)
-    target_include_directories(ntru_plus_impl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_include_directories(ntru_plus_impl PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+target_include_directories(ntru_plus_impl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(ntru_plus_impl PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
 
-    # Collect AIMer objects
-    set(_NTRU_PLUS_OBJS "")
-    if(OQS_ENABLE_KEM_ntru_plus_kem576)
-        list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_clean>)
-    endif()
-    if(OQS_ENABLE_KEM_ntru_plus_kem576_avx2)
-        list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_avx2>)
-    endif()
-    if(OQS_ENABLE_KEM_ntru_plus_kem576_neon)
-        list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_neon>)
-    endif()
-    if(OQS_ENABLE_KEM_ntru_plus_kem768)
-        list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem768_clean>)
-    endif()
-    if(OQS_ENABLE_KEM_ntru_plus_kem768_avx2)
-        list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem768_avx2>)
-    endif()
-    if(OQS_ENABLE_KEM_ntru_plus_kem864)
-        list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem864_clean>)
-    endif()
-    if(OQS_ENABLE_KEM_ntru_plus_kem864_avx2)
-        list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem864_avx2>)
-    endif()
-    if(OQS_ENABLE_KEM_ntru_plus_kem1152)
-        list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem1152_clean>)
-    endif()
-    if(OQS_ENABLE_KEM_ntru_plus_kem1152_avx2)
-        list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem1152_avx2>)
-    endif()
+# Collect AIMer objects
+set(_NTRU_PLUS_OBJS "")
+if(OQS_ENABLE_KEM_ntru_plus_kem576)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_clean>)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_opt>) # [Opt] 사용자 버전 추가
+endif()
+if(OQS_ENABLE_KEM_ntru_plus_kem576_avx2)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_avx2>)
+endif()
+if(OQS_ENABLE_KEM_ntru_plus_kem576_neon)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_neon>) # [Neon] Main 브랜치 버전 추가
+endif()
+if(OQS_ENABLE_KEM_ntru_plus_kem768)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem768_clean>)
+endif()
+if(OQS_ENABLE_KEM_ntru_plus_kem768_avx2)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem768_avx2>)
+endif()
+if(OQS_ENABLE_KEM_ntru_plus_kem864)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem864_clean>)
+endif()
+if(OQS_ENABLE_KEM_ntru_plus_kem864_avx2)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem864_avx2>)
+endif()
+if(OQS_ENABLE_KEM_ntru_plus_kem1152)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem1152_clean>)
+endif()
+if(OQS_ENABLE_KEM_ntru_plus_kem1152_avx2)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem1152_avx2>)
+endif()
 
-
-    # Always include wrapper objects
-    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_impl>)
-    set(NTRU_PLUS_OBJS ${_NTRU_PLUS_OBJS} PARENT_SCOPE) 
-
+# Always include wrapper objects
+list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_impl>)
+set(NTRU_PLUS_OBJS ${_NTRU_PLUS_OBJS} PARENT_SCOPE)
