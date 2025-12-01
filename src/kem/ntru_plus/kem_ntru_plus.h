@@ -18,6 +18,20 @@ OQS_API OQS_STATUS OQS_KEM_ntru_plus_kem576_encaps(uint8_t *ciphertext, uint8_t 
 OQS_API OQS_STATUS OQS_KEM_ntru_plus_kem576_decaps(uint8_t *shared_secret, const uint8_t *ciphertext, const uint8_t *secret_key);
 #endif
 
+// 777
+#ifdef OQS_ENABLE_KEM_ntru_plus_kem576_neon
+#define OQS_KEM_ntru_plus_kem576_neon_length_public_key  864
+#define OQS_KEM_ntru_plus_kem576_neon_length_secret_key  1760
+#define OQS_KEM_ntru_plus_kem576_neon_length_ciphertext  864
+#define OQS_KEM_ntru_plus_kem576_neon_length_keypair_seed  0
+#define OQS_KEM_ntru_plus_kem576_neon_length_shared_secret  32
+OQS_KEM *OQS_KEM_ntru_plus_kem576_neon_new(void);
+OQS_API OQS_STATUS OQS_KEM_ntru_plus_kem576_neon_keypair(uint8_t *public_key, uint8_t *secret_key);
+OQS_API OQS_STATUS OQS_KEM_ntru_plus_kem576_neon_keypair_derand(uint8_t *public_key, uint8_t *secret_key, const uint8_t *keypair_seed);
+OQS_API OQS_STATUS OQS_KEM_ntru_plus_kem576_neon_encaps(uint8_t *ciphertext, uint8_t *shared_secret, const uint8_t *public_key);
+OQS_API OQS_STATUS OQS_KEM_ntru_plus_kem576_neon_decaps(uint8_t *shared_secret, const uint8_t *ciphertext, const uint8_t *secret_key);
+#endif
+
 #ifdef OQS_ENABLE_KEM_ntru_plus_kem768
 #define OQS_KEM_ntru_plus_kem768_length_public_key  1152
 #define OQS_KEM_ntru_plus_kem768_length_secret_key  2336

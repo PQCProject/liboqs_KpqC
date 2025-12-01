@@ -13,6 +13,20 @@
         target_include_directories(ntru_plus_kem576_clean PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
     endif()
 
+    if(OQS_ENABLE_KEM_ntru_plus_kem576_neon)
+        add_library(ntru_plus_kem576_neon OBJECT
+                KpqClean_ver2_NTRU_PLUS_KEM576_neon/kem.c
+                KpqClean_ver2_NTRU_PLUS_KEM576_neon/ntt.c
+                KpqClean_ver2_NTRU_PLUS_KEM576_neon/poly.c
+                KpqClean_ver2_NTRU_PLUS_KEM576_neon/reduce.c
+                KpqClean_ver2_NTRU_PLUS_KEM576_neon/symmetric.c
+                KpqClean_ver2_NTRU_PLUS_KEM576_neon/verify.c
+        )
+        target_include_directories(ntru_plus_kem576_neon PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU+KEM576_neon)
+        target_include_directories(ntru_plus_kem576_neon PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+        target_compile_options(ntru_plus_kem576_neon PRIVATE $<$<CONFIG:Debug>:-O0 -g -fno-inline>)
+    endif()
+
     if(OQS_ENABLE_KEM_ntru_plus_kem768)
         add_library(ntru_plus_kem768_clean OBJECT
             KpqClean_ver2_NTRU_PLUS_KEM768_clean/kem.c
@@ -107,6 +121,7 @@
     # --- AIMer wrapper objects ---
     add_library(ntru_plus_impl OBJECT
         kem_ntru_plus_kem576.c
+        kem_ntru_plus_kem576_neon.c
         kem_ntru_plus_kem768.c
         kem_ntru_plus_kem864.c
         kem_ntru_plus_kem1152.c)
@@ -120,6 +135,9 @@
     endif()
     if(OQS_ENABLE_KEM_ntru_plus_kem576_avx2)
         list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_avx2>)
+    endif()
+    if(OQS_ENABLE_KEM_ntru_plus_kem576_neon)
+        list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_neon>)
     endif()
     if(OQS_ENABLE_KEM_ntru_plus_kem768)
         list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem768_clean>)

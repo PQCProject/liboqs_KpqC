@@ -66,6 +66,7 @@ endif()
 # KEM API tests
 add_executable(example_kem example_kem.c)
 target_link_libraries(example_kem PRIVATE ${TEST_DEPS})
+#target_compile_options(example_kem PRIVATE $<$<CONFIG:Debug>:-O0 -g -fno-inline>)
 
 add_executable(kat_kem kat_kem.c test_helpers.c)
 target_link_libraries(kat_kem PRIVATE ${TEST_DEPS})

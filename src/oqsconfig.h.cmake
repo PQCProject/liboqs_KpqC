@@ -147,6 +147,7 @@
 #cmakedefine OQS_ENABLE_KEM_NTRU_PLUS 1
 #cmakedefine OQS_ENABLE_KEM_ntru_plus_kem576 1
 #cmakedefine OQS_ENABLE_KEM_ntru_plus_kem576_avx2 1
+#cmakedefine OQS_ENABLE_KEM_ntru_plus_kem576_neon 1
 #cmakedefine OQS_ENABLE_KEM_ntru_plus_kem768 1
 #cmakedefine OQS_ENABLE_KEM_ntru_plus_kem768_avx2 1
 #cmakedefine OQS_ENABLE_KEM_ntru_plus_kem864 1

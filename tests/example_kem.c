@@ -39,45 +39,53 @@ void cleanup_heap(uint8_t *secret_key, uint8_t *shared_secret_e,
  * was compiled.
  */
 static OQS_STATUS example_stack(void) {
-#ifndef OQS_ENABLE_KEM_ml_kem_768 // if ML-KEM-768 was not enabled at compile-time
-	printf("[example_stack] OQS_KEM_ml_kem_768 was not enabled at "
+// #ifndef OQS_ENABLE_KEM_ml_kem_768 // if ML-KEM-768 was not enabled at compile-time
+#ifndef OQS_ENABLE_KEM_ntru_plus_kem576_neon // if ML-KEM-768 was not enabled at compile-time
+	printf("[example_stack] OQS_KEM_ml_kem_576_neon was not enabled at "
 	       "compile-time.\n");
 	return OQS_SUCCESS; // nothing done successfully ;-)
 #else
-	uint8_t public_key[OQS_KEM_ml_kem_768_length_public_key];
-	uint8_t secret_key[OQS_KEM_ml_kem_768_length_secret_key];
-	uint8_t ciphertext[OQS_KEM_ml_kem_768_length_ciphertext];
-	uint8_t shared_secret_e[OQS_KEM_ml_kem_768_length_shared_secret];
-	uint8_t shared_secret_d[OQS_KEM_ml_kem_768_length_shared_secret];
+	// uint8_t public_key[OQS_KEM_ml_kem_768_length_public_key];
+	// uint8_t secret_key[OQS_KEM_ml_kem_768_length_secret_key];
+	// uint8_t ciphertext[OQS_KEM_ml_kem_768_length_ciphertext];
+	// uint8_t shared_secret_e[OQS_KEM_ml_kem_768_length_shared_secret];
+	// uint8_t shared_secret_d[OQS_KEM_ml_kem_768_length_shared_secret];
+	uint8_t public_key[OQS_KEM_ntru_plus_kem576_neon_length_public_key];
+	uint8_t secret_key[OQS_KEM_ntru_plus_kem576_neon_length_secret_key];
+	uint8_t ciphertext[OQS_KEM_ntru_plus_kem576_neon_length_ciphertext];
+	uint8_t shared_secret_e[OQS_KEM_ntru_plus_kem576_neon_length_shared_secret];
+	uint8_t shared_secret_d[OQS_KEM_ntru_plus_kem576_neon_length_shared_secret];
 
-	OQS_STATUS rc = OQS_KEM_ml_kem_768_keypair(public_key, secret_key);
+	// 원본
+	OQS_STATUS rc = OQS_KEM_ntru_plus_kem576_neon_keypair(public_key, secret_key);
+	// OQS_STATUS rc = (OQS_STATUS) crypto_kem_keypair2(public_key, secret_key);
 	if (rc != OQS_SUCCESS) {
-		fprintf(stderr, "ERROR: OQS_KEM_ml_kem_768_keypair failed!\n");
-		cleanup_stack(secret_key, OQS_KEM_ml_kem_768_length_secret_key,
+		fprintf(stderr, "ERROR: OQS_KEM_ntru_plus_kem576_neon_keypair failed!\n");
+		cleanup_stack(secret_key, OQS_KEM_ntru_plus_kem576_neon_length_secret_key,
 		              shared_secret_e, shared_secret_d,
-		              OQS_KEM_ml_kem_768_length_shared_secret);
+		              OQS_KEM_ntru_plus_kem576_neon_length_shared_secret);
 
 		return OQS_ERROR;
 	}
-	rc = OQS_KEM_ml_kem_768_encaps(ciphertext, shared_secret_e, public_key);
+	rc = OQS_KEM_ntru_plus_kem576_neon_encaps(ciphertext, shared_secret_e, public_key);
 	if (rc != OQS_SUCCESS) {
-		fprintf(stderr, "ERROR: OQS_KEM_ml_kem_768_encaps failed!\n");
-		cleanup_stack(secret_key, OQS_KEM_ml_kem_768_length_secret_key,
+		fprintf(stderr, "ERROR: OQS_KEM_ntru_plus_kem576_neon_encaps failed!\n");
+		cleanup_stack(secret_key, OQS_KEM_ntru_plus_kem576_neon_length_secret_key,
 		              shared_secret_e, shared_secret_d,
-		              OQS_KEM_ml_kem_768_length_shared_secret);
+		              OQS_KEM_ntru_plus_kem576_neon_length_shared_secret);
 
 		return OQS_ERROR;
 	}
-	rc = OQS_KEM_ml_kem_768_decaps(shared_secret_d, ciphertext, secret_key);
+	rc = OQS_KEM_ntru_plus_kem576_neon_decaps(shared_secret_d, ciphertext, secret_key);
 	if (rc != OQS_SUCCESS) {
-		fprintf(stderr, "ERROR: OQS_KEM_ml_kem_768_decaps failed!\n");
-		cleanup_stack(secret_key, OQS_KEM_ml_kem_768_length_secret_key,
+		fprintf(stderr, "ERROR: OQS_KEM_ntru_plus_kem576_neon_decaps failed!\n");
+		cleanup_stack(secret_key, OQS_KEM_ntru_plus_kem576_neon_length_secret_key,
 		              shared_secret_e, shared_secret_d,
-		              OQS_KEM_ml_kem_768_length_shared_secret);
+		              OQS_KEM_ntru_plus_kem576_neon_length_shared_secret);
 
 		return OQS_ERROR;
 	}
-	printf("[example_stack] OQS_KEM_ml_kem_768 operations completed.\n");
+	printf("[example_stack] OQS_KEM_ntru_plus_kem576_neon operations completed.\n");
 
 	return OQS_SUCCESS; // success!
 #endif
@@ -100,9 +108,10 @@ static OQS_STATUS example_heap(void) {
 	uint8_t *shared_secret_e = NULL;
 	uint8_t *shared_secret_d = NULL;
 
-	kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_768);
+	// kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_768);
+	kem = OQS_KEM_new(OQS_KEM_alg_ntru_plus_kem576_neon);
 	if (kem == NULL) {
-		printf("[example_heap]  OQS_KEM_ml_kem_768 was not enabled at "
+		printf("[example_heap]  OQS_KEM_ntru_plus_kem576_neon was not enabled at "
 		       "compile-time.\n");
 		return OQS_SUCCESS;
 	}
@@ -146,7 +155,7 @@ static OQS_STATUS example_heap(void) {
 		return OQS_ERROR;
 	}
 
-	printf("[example_heap]  OQS_KEM_ml_kem_768 operations completed.\n");
+	printf("[example_heap]  OQS_KEM_ntru_plus_kem576_neon operations completed.\n");
 	cleanup_heap(secret_key, shared_secret_e, shared_secret_d, public_key,
 	             ciphertext, kem);
 
