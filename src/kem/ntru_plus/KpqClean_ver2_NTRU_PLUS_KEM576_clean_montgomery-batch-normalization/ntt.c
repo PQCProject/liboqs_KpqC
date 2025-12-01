@@ -289,8 +289,6 @@ void basemul_add(int16_t r[4], const int16_t a[4], const int16_t b[4], const int
 	r[3] = montgomery_reduce(c[3]*(-147)+a[0]*b[3]+a[1]*b[2]+a[2]*b[1]+a[3]*b[0]);
 }
 
-// ... 기존 코드 끝 ...
-
 /*************************************************
 * Name:        fq_batchinv
 * Description: 몽고메리 배치 역원 알고리즘 (Batch Inversion)
@@ -303,16 +301,13 @@ void fq_batchinv(int16_t *r, const int16_t *a, int n) {
 
     if (n == 0) return;
 
-    // [Step 1] 누적 곱 계산 (Accumulate Products)
     c[0] = a[0];
     for (i = 1; i < n; i++) {
         c[i] = fqmul(c[i - 1], a[i]);
     }
 
-    // [Step 2] 전체 곱에 대한 역원 단 1회 계산 (fqinv 호출)
     all_inv = fqinv(c[n - 1]);
 
-    // [Step 3] 역순으로 개별 역원 추출
     for (i = n - 1; i > 0; i--) {
         r[i] = fqmul(c[i - 1], all_inv);
         all_inv = fqmul(all_inv, a[i]);
@@ -337,14 +332,12 @@ int baseinv_calc_t_values(int16_t t_values[3], int16_t *t3_out, const int16_t a[
 
     t3 = montgomery_reduce(t0*t0 - t1*t2);
 
-    if(t3 == 0) return 1; // 역원 존재하지 않음
+    if(t3 == 0) return 1;
 
-    // 중간값 저장
     t_values[0] = t0;
     t_values[1] = t1;
     t_values[2] = t2;
 
-    // 행렬식 출력 (이 값을 나중에 모아서 한꺼번에 역원 계산함)
     *t3_out = t3;
 
     return 0;
@@ -365,7 +358,6 @@ void baseinv_apply_inv(int16_t r[4], const int16_t a[4], const int16_t t_values[
     r[2] = montgomery_reduce(a[2]*t0 + a[0]*t1);
     r[3] = montgomery_reduce(a[1]*t1 + a[3]*t0);
 
-    // t3_inv는 이미 몽고메리 도메인 값
     r[0] =  montgomery_reduce(r[0]*t3_inv);
     r[1] = -montgomery_reduce(r[1]*t3_inv);
     r[2] =  montgomery_reduce(r[2]*t3_inv);
