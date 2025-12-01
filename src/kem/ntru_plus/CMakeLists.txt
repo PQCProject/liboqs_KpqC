@@ -27,6 +27,21 @@ if(OQS_ENABLE_KEM_ntru_plus_kem576)
     target_include_directories(ntru_plus_kem576_opt PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
 endif()
 
+# --- [Main Branch] Neon Implementation ---
+if(OQS_ENABLE_KEM_ntru_plus_kem576_neon)
+    add_library(ntru_plus_kem576_neon OBJECT
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/kem.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/ntt.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/poly.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/reduce.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/symmetric.c
+            KpqClean_ver2_NTRU_PLUS_KEM576_neon/verify.c
+    )
+    target_include_directories(ntru_plus_kem576_neon PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/KpqClean_ver2_NTRU+KEM576_neon)
+    target_include_directories(ntru_plus_kem576_neon PRIVATE ${PROJECT_SOURCE_DIR}/src/common/pqclean_shims)
+    target_compile_options(ntru_plus_kem576_neon PRIVATE $<$<CONFIG:Debug>:-O0 -g -fno-inline>)
+endif()
+
 if(OQS_ENABLE_KEM_ntru_plus_kem768)
     add_library(ntru_plus_kem768_clean OBJECT
             KpqClean_ver2_NTRU_PLUS_KEM768_clean/kem.c
@@ -121,7 +136,8 @@ endif()
 # --- AIMer wrapper objects ---
 add_library(ntru_plus_impl OBJECT
         kem_ntru_plus_kem576.c
-        kem_ntru_plus_kem576_opt.c  # [수정] 이 줄이 반드시 포함되어야 합니다!
+        kem_ntru_plus_kem576_opt.c  # [Opt] 사용자 버전
+        kem_ntru_plus_kem576_neon.c # [Neon] Main 브랜치 버전
         kem_ntru_plus_kem768.c
         kem_ntru_plus_kem864.c
         kem_ntru_plus_kem1152.c)
@@ -132,10 +148,13 @@ target_include_directories(ntru_plus_impl PRIVATE ${PROJECT_SOURCE_DIR}/src/comm
 set(_NTRU_PLUS_OBJS "")
 if(OQS_ENABLE_KEM_ntru_plus_kem576)
     list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_clean>)
-    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_opt>) # [수정] 안전하게 여기에 추가
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_opt>) # [Opt] 사용자 버전 추가
 endif()
 if(OQS_ENABLE_KEM_ntru_plus_kem576_avx2)
     list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_avx2>)
+endif()
+if(OQS_ENABLE_KEM_ntru_plus_kem576_neon)
+    list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem576_neon>) # [Neon] Main 브랜치 버전 추가
 endif()
 if(OQS_ENABLE_KEM_ntru_plus_kem768)
     list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem768_clean>)
@@ -155,7 +174,6 @@ endif()
 if(OQS_ENABLE_KEM_ntru_plus_kem1152_avx2)
     list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_kem1152_avx2>)
 endif()
-
 
 # Always include wrapper objects
 list(APPEND _NTRU_PLUS_OBJS $<TARGET_OBJECTS:ntru_plus_impl>)

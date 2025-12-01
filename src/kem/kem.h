@@ -103,6 +103,8 @@ extern "C" {
 /** Algorithm identifier for NTRU-Plus-KEM-576 KEM. */
 #define OQS_KEM_alg_ntru_plus_kem576 "NTRU-Plus-KEM-576"
 #define OQS_KEM_alg_ntru_plus_kem576_opt "NTRU-Plus-KEM-576-Opt"
+/** Algorithm identifier for NTRU-Plus-KEM-576-neon KEM. */
+#define OQS_KEM_alg_ntru_plus_kem576_neon "NTRU-Plus-KEM-576-neon"
 /** Algorithm identifier for NTRU-Plus-KEM-768 KEM. */
 #define OQS_KEM_alg_ntru_plus_kem768 "NTRU-Plus-KEM-768"
 /** Algorithm identifier for NTRU-Plus-KEM-864 KEM. */

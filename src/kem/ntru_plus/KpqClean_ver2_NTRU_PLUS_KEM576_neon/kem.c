@@ -1,5 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+
 #include "api.h"
 #include "params.h"
 #include "symmetric.h"
@@ -24,7 +26,6 @@
 int crypto_kem_keypair(unsigned char *pk, unsigned char *sk)
 {
 	uint8_t buf[NTRUPLUS_N / 4];
-	
 	poly f, finv;
 	poly g;
 	poly h, hinv;
@@ -69,6 +70,7 @@ int crypto_kem_keypair(unsigned char *pk, unsigned char *sk)
 	
 	return 0;
 }
+
 
 /*************************************************
 * Name:        crypto_kem_enc
