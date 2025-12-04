@@ -185,12 +185,22 @@ static inline int16x8_t fqmul_vec8_const(int16x8_t a, int16_t zeta) {
 	return vcombine_s16(fqmul_vec4_const(vget_low_s16(a), zeta), fqmul_vec4_const(vget_high_s16(a), zeta));
 }
 
+// int16x4_t : 16비트 int타입 "4개"
 static inline int16x4_t barrett_reduce_vec4(int16x4_t a) {
 	const int32_t v = ((1 << 26) + NTRUPLUS_Q/2)/NTRUPLUS_Q;
-	int32x4_t a32 = vmovl_s16(a);
+	int32x4_t a32 = vmovl_s16(a); // 16비트 4개 -> 32비트 4개로 확장 (이후 1<<25에서 형변환 필요함)
+
+	// 스칼라 코드에서 ((int32_t)v*a + (1<<25))
 	int32x4_t t = vaddq_s32(vmulq_n_s32(a32, v), vdupq_n_s32(1 << 25));
+
+	// 스칼라 코드에서 ">> 26"
 	t = vshrq_n_s32(t, 26);
+
+	// 스칼라 코드에서 "t *= NTRUPLUS_Q;"
 	t = vmulq_n_s32(t, NTRUPLUS_Q);
+
+	// 스칼라 코드에서 	return a - t; (추가로 16비트 변환과정 포함)
+	// 	참고로 스칼라에서는 t가 int_16이므로 t *= NTRUPLUS_Q;에서 자동으로 32비트에서 16비트로 형변환
 	return vmovn_s32(vsubq_s32(a32, t));
 }
 

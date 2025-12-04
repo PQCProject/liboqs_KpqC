@@ -56,12 +56,8 @@ OQS_API const char *OQS_KEM_alg_identifier(size_t i) {
         OQS_KEM_alg_smaug_t5,
 
         OQS_KEM_alg_ntru_plus_kem576,
-        
         OQS_KEM_alg_ntru_plus_kem576_neon,
-
-#ifdef OQS_ENABLE_KEM_ntru_plus_kem576
         OQS_KEM_alg_ntru_plus_kem576_opt,
-#endif
         OQS_KEM_alg_ntru_plus_kem768,
         OQS_KEM_alg_ntru_plus_kem864,
         OQS_KEM_alg_ntru_plus_kem1152,
