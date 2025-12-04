@@ -28,7 +28,7 @@ static inline void cbd1_expand16(int16_t out[16], uint16_t t1, uint16_t t2)
 	const int16x8_t shift_lo = vld1q_s16(cbd_shift_lo_data);
 	const int16x8_t shift_hi = vld1q_s16(cbd_shift_hi_data);
 
-	uint16x8_t v1 = vdupq_n_u16(t1);
+	uint16x8_t v1 = vdupq_n_u16(t1); // vdupq_n_u16 :
 	uint16x8_t v2 = vdupq_n_u16(t2);
 
 	uint16x8_t bits1_lo = vandq_u16(vshlq_u16(v1, shift_lo), ones);
@@ -477,6 +477,8 @@ void poly_triple(poly *r, const poly *a)
 		int16x8_t va = vld1q_s16(a->coeffs + i);
 		vst1q_s16(r->coeffs + i, vmulq_n_s16(va, 3));
 	}
+	// 아래는 나머지 처리용 (기존 스칼라와 동일)
+	// 576 및 NTRU+는 다 8로 나누어떨어지기 때문에 사실상 의미 없는 코드 (i값 때문에 실행안됨)
 	for(; i < NTRUPLUS_N; ++i)
 	{
 		r->coeffs[i] = 3*a->coeffs[i];

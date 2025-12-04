@@ -405,7 +405,7 @@ inline int16x4_t montgomery_reduce_vec4_opt(int32x4_t a) {
 **************************************************/
 void ntt(int16_t r[NTRUPLUS_N], const int16_t a[NTRUPLUS_N])
 {
-int k = 1;
+	int k = 1;
     int16_t zeta1 = zetas[k++];
     for(int i = 0; i < NTRUPLUS_N/2; i += 8) {
        int16x8_t a0 = vld1q_s16(a + i);
@@ -414,6 +414,7 @@ int k = 1;
        vst1q_s16(r + i + NTRUPLUS_N/2, vsubq_s16(vaddq_s16(a0, a1), t1));
        vst1q_s16(r + i, vaddq_s16(a0, t1));
     }
+
     for(int step = NTRUPLUS_N/6; step >= 32; step = step/3) {
        for(int start = 0; start < NTRUPLUS_N; start += 3*step) {
           int16_t zeta_a = zetas[k++];
@@ -432,6 +433,7 @@ int k = 1;
           }
        }
     }
+
     for(int step = 16; step >= 4; step >>= 1) {
        for(int start = 0; start < NTRUPLUS_N; start += (step << 1)) {
           int16_t zeta = zetas[k++];
