@@ -42,6 +42,7 @@ Please see `LICENSE.txt` for full details.
 
 
 **3. Function Inlining**
+
    •	Implementation Path:
    src/kem/ntru_plus/KpqClean_ver2_NTRU_PLUS_KEM576_clean_montgomery-batch-normalization<br>
    •	Converts montgomery_reduce and barrett_reduce into static inline functions<br>
